@@ -1,0 +1,2 @@
+This file ensures that storage will be pushed to the repo even if there are no files in it
+(Git usually doesn't push empty folders)
