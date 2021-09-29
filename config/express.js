@@ -44,7 +44,6 @@ attaches all the routes to app
 const setRoutes = function (app) {
     require('../app/routes/admin.routes')(app);
     require('../app/routes/allocations.routes')(app);
-    require('../app/routes/backdoor.routes')(app);
     require('../app/routes/lessons.routes')(app);
     require('../app/routes/storage.routes')(app);
     require('../app/routes/users.routes')(app);
