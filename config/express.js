@@ -30,12 +30,12 @@ Makes app accept the following content types
  */
 const setAcceptedContent = function (app) {
     app.use(bodyParser.json());
-    app.use(bodyParser.raw({ type: 'text/plain', limit: '100mb'}));  // for the /executeSql endpoint
-    app.use(bodyParser.raw({ type: 'application/msword', limit: '100mb'}));
-    app.use(bodyParser.raw({ type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', limit: '100mb'}));
-    app.use(bodyParser.raw({ type: 'application/vnd.ms-powerpoint', limit: '100mb'}));
-    app.use(bodyParser.raw({ type: 'application/vnd.openxmlformats-officedocument.presentationml.presentation', limit: '100mb'}));
-    app.use(bodyParser.raw({ type: 'application/pdf', limit: '100mb'}));
+    app.use(bodyParser.raw({ type: 'text/plain', limit: '500mb'}));  // for the /executeSql endpoint
+    app.use(bodyParser.raw({ type: 'application/msword', limit: '500mb'}));
+    app.use(bodyParser.raw({ type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', limit: '500mb'}));
+    app.use(bodyParser.raw({ type: 'application/vnd.ms-powerpoint', limit: '500mb'}));
+    app.use(bodyParser.raw({ type: 'application/vnd.openxmlformats-officedocument.presentationml.presentation', limit: '500mb'}));
+    app.use(bodyParser.raw({ type: 'application/pdf', limit: '500mb'}));
 }
 
 /*

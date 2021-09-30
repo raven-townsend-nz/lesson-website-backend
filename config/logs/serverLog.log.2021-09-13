@@ -1,7 +1,0 @@
-[2021-09-13T17:23:37.748] [ERROR] default - Error in logout(), users.controller, Error [ERR_HTTP_HEADERS_SENT]: Cannot set headers after they are sent to the client
-[2021-09-13T18:04:46.903] [INFO] default - Connecting to database...
-[2021-09-13T18:04:46.907] [INFO] default - Connection successful.
-[2021-09-13T18:04:47.012] [INFO] default - Listening on port: 4941
-[2021-09-13T18:21:17.533] [INFO] default - Connecting to database...
-[2021-09-13T18:21:17.535] [INFO] default - Connection successful.
-[2021-09-13T18:21:17.585] [INFO] default - Listening on port: 4941
