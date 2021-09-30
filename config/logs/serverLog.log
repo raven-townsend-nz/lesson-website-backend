@@ -50,3 +50,9 @@
 [2021-09-19T20:30:33.623] [ERROR] default - Error in patchAllocation(), allocations.controller, Error: Column 'instructor_id' cannot be null
 [2021-09-19T20:31:26.487] [ERROR] default - Error in patchAllocation(), allocations.controller, Error: Column 'instructor_id' cannot be null
 [2021-09-19T20:31:53.739] [ERROR] default - Error in patchAllocation(), allocations.controller, Error: Column 'instructor_id' cannot be null
+[2021-10-01T00:26:18.792] [INFO] default - Connecting to database...
+[2021-10-01T00:26:18.794] [INFO] default - Connection successful.
+[2021-10-01T00:26:18.832] [INFO] default - Listening on port: 4941
+[2021-10-01T00:29:13.923] [INFO] default - Connecting to database...
+[2021-10-01T00:29:13.925] [INFO] default - Connection successful.
+[2021-10-01T00:29:13.963] [INFO] default - Listening on port: 4941
