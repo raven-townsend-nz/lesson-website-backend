@@ -191,6 +191,7 @@ exports.getAllInstructors = async function (allocationId) {
             id: user.id,
             firstName: user.first_name,
             lastName: user.last_name,
+            slackId: user.slack_id,
         }
         users.push(userObj);
     }
