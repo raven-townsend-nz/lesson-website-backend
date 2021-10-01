@@ -119,7 +119,7 @@ exports.getAllocationsForUser = async function (userId, showPast) {
 
 exports.getAllAllocations = async function (showPast) {
     let filterPastCurrent = showPast === "true" ? "A.date < CURDATE()" : "A.date >= CURDATE()";
-    const getSql = `SELECT DISTINCT A.id, A.lesson_id, A.year_group, A.period, A.date, S.state, L.code, L.year_level, L.lesson_number, L.title FROM (lesson_allocations AS A JOIN state S ON A.state_id = S.id JOIN allocated_instructors I ON I.allocation_id = A.id JOIN lessons L on A.lesson_id = L.id) WHERE ${filterPastCurrent} ORDER BY date ASC;`;
+    const getSql = `SELECT DISTINCT A.id, A.lesson_id, A.year_group, A.lesson_plan_required, A.period, A.date, S.state, L.code, L.year_level, L.lesson_number, L.title FROM (lesson_allocations AS A JOIN state S ON A.state_id = S.id JOIN allocated_instructors I ON I.allocation_id = A.id JOIN lessons L on A.lesson_id = L.id) WHERE ${filterPastCurrent} ORDER BY date ASC;`;
     let allocations = (await db.getPool().query(getSql))[0];
     let formattedAllocations = [];
     for (let allocation of allocations) {
@@ -134,7 +134,8 @@ exports.getAllAllocations = async function (showPast) {
             code: allocation.code,
             yearLevel: allocation.year_level,
             lessonNumber: allocation.lesson_number,
-            title: allocation.title
+            title: allocation.title,
+            lessonPlanRequired: allocation.lesson_plan_required
         }
         formattedAllocations.push(formattedAllocation);
     }
