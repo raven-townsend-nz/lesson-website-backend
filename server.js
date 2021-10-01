@@ -6,8 +6,10 @@ const slackApi = require("./slack/slackApi");
 const logger = require("./config/logger");
 const allocations = require('./app/models/allocations.models');
 
+
 const app = express();
 const port = process.env.PORT || 4941;
+
 
 // Test connection to MySQL on start-up
 async function testDbConnection() {
@@ -22,6 +24,7 @@ async function testDbConnection() {
     }
 }
 
+
 testDbConnection()
     .then(function () {
         app.listen(port, function () {
@@ -29,9 +32,10 @@ testDbConnection()
         });
     });
 
-/*
-Checks if DGAA exists and is an Admin.
-If not, this function will fix the DGAA.
+
+/**
+ * Checks if DGAA exists and is an Admin.
+ * If not, this function will fix the DGAA.
  */
 async function assertDGAAExists() {
     logger.getLogger().info("Checking DGAA exists...");
@@ -67,9 +71,10 @@ async function assertDGAAExists() {
 
 }
 
-/*
-Checks if there are any lesson allocations which are late and do not have a lesson plan.
-If there are, this function sends notifications to those instructors.
+
+/**
+ * Checks if there are any lesson allocations which are late and do not have a lesson plan.
+ * If there are, this function sends notifications to those instructors.
  */
 async function checkForLateReminders() {
     logger.getLogger().info("Checking for late allocations...");
@@ -91,6 +96,7 @@ async function checkForLateReminders() {
         logger.getLogger().error(`Error in checkForLateReminders() in server.js ${err}`)
     }
 }
+
 
 /**
  * Checks for any upcoming lessons and sends the appropriate notifications
@@ -116,6 +122,7 @@ async function checkForUpcomingLessonReminders(){
     }
 }
 
+
 setInterval(async () => {
     logger.getLogger().info("#### Beginning weekly tasks ####");
     try {
@@ -129,6 +136,7 @@ setInterval(async () => {
         logger.getLogger().error(`Failed in clearLastYearsAllocations() in server.js ${err}`);
     }
 }, 6.048e8); // One week 6.048e8
+
 
 setInterval(async () => {
     logger.getLogger().info("#### Beginning daily tasks ####");
