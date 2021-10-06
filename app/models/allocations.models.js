@@ -181,12 +181,10 @@ exports.getOneAllocation = async function (allocationId) {
 
 
 exports.getAllInstructors = async function (allocationId) {
-    const getUserIdsSql = "SELECT instructor_id FROM allocated_instructors WHERE allocation_id = ?";
-    const [userIdRows] = await db.getPool().query(getUserIdsSql, [allocationId]);
+    const getUserIdsSql = "SELECT * FROM users WHERE id in (SELECT instructor_id FROM allocated_instructors WHERE allocation_id = ?)";
+    const [usersResult] = await db.getPool().query(getUserIdsSql, [allocationId]);
     let users = [];
-    for (let row of userIdRows) {
-        let userId = row.instructor_id;
-        let user = await userModel.getUserById(userId);
+    for (let user of usersResult) {
         const userObj = {
             id: user.id,
             firstName: user.first_name,
