@@ -1,7 +1,8 @@
 const db = require('../../config/db');
 const randtoken = require('rand-token');
 const passwords = require('../middleware/passwords');
-const DGAA_EMAIL = process.env.DGAA_EMAIL;
+const functions = require("firebase-functions");
+const DGAA_EMAIL = functions.config().env.dgaa_email;
 
 /**
  * Checks if the given string is all lower case, and if so capitalises the first letter. Otherwise leaves as is (don't

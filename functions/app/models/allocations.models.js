@@ -2,6 +2,7 @@ const db = require('../../config/db');
 const userModel = require('./users.models');
 const storage = require('./storage.models');
 const logger = require("../../config/logger");
+const functions = require("firebase-functions");
 
 /**
  * Checks if the input combination exists in a row in lesson-allocations.
@@ -269,7 +270,7 @@ exports.getLateAllocations = async function () {
     "LEFT JOIN allocated_instructors I ON A.id = I.allocation_id " + // gets the instructors
     "LEFT JOIN lessons L ON A.lesson_id = L.id " + // gets the lesson titles
     "LEFT JOIN users U on I.instructor_id = U.id"; // gets the slack id from users table
-    return (await db.getPool().query(getAllocationsSql, [process.env.LESSON_PLAN_DUE]))[0];
+    return (await db.getPool().query(getAllocationsSql, [functions.config().env.lesson_plan_due]))[0];
 };
 
 exports.getUpcomingLessons = async function () {

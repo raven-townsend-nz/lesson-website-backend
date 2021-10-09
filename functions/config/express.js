@@ -4,6 +4,9 @@ const { allowCrossOriginRequestsMiddleware } = require('../app/middleware/cors.m
 const morgan = require('morgan');
 const path = require('path');
 const rfs = require('rotating-file-stream');
+const functions = require("firebase-functions");
+const cors = require('cors');
+
 
 /*
 Sets up Morgan, an http logger, for app
@@ -13,9 +16,9 @@ const setupMorgan = function(app) {
     // This creates a new log at an interval set in the .env
     // Once max files are hit, extra files are deleted
     const accessLogStream = rfs.createStream('httpAccess.log', {
-        interval: process.env.MORGAN_INTERVAL, // rotate daily
-        path: path.join(__dirname, 'logs'),
-        maxFiles: Number(process.env.MAX_LOG_COUNT)
+        interval: functions.config().env.morgan_interval, // rotate daily
+        path: '/tmp/logs',
+        maxFiles: Number(functions.config().env.max_log_count)
     });
 
     // setup the logger
@@ -58,6 +61,7 @@ module.exports = function () {
 
     // MIDDLEWARE
     app.use(allowCrossOriginRequestsMiddleware);
+    app.use(cors({ origin: true }));
 
     setupMorgan(app);
     setAcceptedContent(app);

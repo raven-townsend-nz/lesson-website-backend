@@ -1,7 +1,8 @@
 const db = require('../../config/db');
 const passwords = require('../middleware/passwords');
-const DGAA_EMAIL = process.env.DGAA_EMAIL;
-const DGAA_PASS = process.env.DGAA_PASS;
+const functions = require("firebase-functions");
+const DGAA_EMAIL = functions.config().env.dgaa_email;
+const DGAA_PASS = functions.config().env.dgaa_pass;
 
 exports.createDGAA = async function() {
     const createDGAASql = "INSERT INTO `users` (`email`, `first_name`, `last_name`, `password`, `slack_id`, `auth_token`, `is_admin`) " +
