@@ -1,6 +1,9 @@
 const storage = require('../models/storage.models');
 const logger = require("../../config/logger");
 const allocations = require('../models/allocations.models');
+const {Storage} = require('@google-cloud/storage');
+const functions = require("firebase-functions");
+
 
 const acceptedTypes = [
     'application/msword', //.doc
@@ -12,26 +15,30 @@ const acceptedTypes = [
 
 exports.directArchive = async function (req, res) {
     try {
-        const fileContents = req.body;
-        const fileName = req.query.filename;
-        const group = req.query.group;
-        const lessonId = req.query.lessonId;
-        if (fileName === null || group === null || lessonId === null) {
-            res.status(400).send("One of the required query parameters (fileName, group, lessonId) is missing");
-            return;
-        }
-        const contentType = req.header("Content-Type");
-
-        if (fileContents === undefined){
-            res.status(400).send("File contents are empty");
-            return;
-        } else if (!(acceptedTypes.includes(contentType))) {
-            res.status(400).send("Content type not accepted");
+        console.log(req.file);
+        if (!req.body) {
+            res.status(400).send('No file uploaded.');
             return;
         }
 
-        const fileId = (await storage.uploadToArchive(fileContents, contentType, fileName, group, lessonId));
-        res.status(200).send({fileId: fileId});
+        const storage = new Storage();
+        const bucket = storage.bucket(functions.config().env.gcloud_storage_bucket);
+
+        // Create a new blob in the bucket and upload the file data.
+        const blob = bucket.file(req.file.originalname);
+        const blobStream = blob.createWriteStream({
+            resumable: false,
+        });
+
+        blobStream.on('finish', () => {
+            // The public URL can be used to directly access the file via HTTP.
+            const publicUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
+            console.log(publicUrl)
+            res.status(200).send(publicUrl);
+        });
+
+        blobStream.end(req.file.buffer);
+        res.status(200).send();
 
     } catch (err) {
         logger.getLogger().error(`Error in directArchive(), storage.controller, ${err}`);
