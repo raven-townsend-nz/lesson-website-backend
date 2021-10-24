@@ -13,8 +13,7 @@ exports.uploadToArchive = async function (fileContents, contentType, fileName, g
 
     let storedFileName = `${fileId}-${fileName}`;
 
-    let root = path.dirname(require.main.filename)
-    let filePath = path.join(root +'/storage/', storedFileName);
+    let filePath = path.join(__dirname, '../../storage/', storedFileName);
     fs.writeFileSync(filePath, fileContents);
 
     return fileId;
@@ -28,9 +27,7 @@ exports.uploadToAllocation = async function (fileContents, contentType, fileName
     await db.getPool().query(allocationSQL, [allocationId, fileId]);
 
     let storedFileName = `${fileId}-${fileName}`;
-
-    let root = path.dirname(require.main.filename)
-    let filePath = path.join(root +'/storage/', storedFileName);
+    let filePath = path.join(__dirname, '../../storage/', storedFileName);
     fs.writeFileSync(filePath, fileContents);
 
     return fileId;
