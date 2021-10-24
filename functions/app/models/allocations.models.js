@@ -279,7 +279,7 @@ exports.getUpcomingLessons = async function () {
         "LEFT JOIN allocated_instructors I ON A.id = I.allocation_id " + // gets the instructors
         "LEFT JOIN lessons L ON A.lesson_id = L.id " + // gets the lesson titles
         "LEFT JOIN users U on I.instructor_id = U.id"; // gets the slack id from users table
-    return (await db.getPool().query(getUpcomingLessonsSql, [process.env.UPCOMING_LESSON_DAYS]))[0];
+    return (await db.getPool().query(getUpcomingLessonsSql, [functions.config().env.upcoming_lesson_days]))[0];
 };
 
 exports.getAllocationFiles = async function (allocationId) {
