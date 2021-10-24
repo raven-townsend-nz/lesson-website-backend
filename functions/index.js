@@ -6,15 +6,16 @@ const slackApi = require("./slack/slackApi");
 const logger = require("./config/logger");
 const allocations = require('./app/models/allocations.models');
 const exp = require('express');
-const functions = require('firebase-functions').region('australia-southeast1');
+const functions = require('firebase-functions');
+const functionsWithRegion = require('firebase-functions').region('australia-southeast1');
 
 
 const app = exp();
-const port = process.env.PORT || 4941;
+const port = functions.config().env.port || 4941;
 
 const main = express();
 main.use('/', app);
-exports.app = functions.https.onRequest(main);
+exports.app = functionsWithRegion.https.onRequest(main);
 
 // Test connection to MySQL on start-up
 async function testDbConnection() {
