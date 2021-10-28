@@ -19,7 +19,7 @@ exports.app = functionsWithRegion.https.onRequest(main);
 
 // Test connection to MySQL on start-up
 async function testDbConnection() {
-    logger.getLogger().info("Connecting to database...");
+    logger.getLogger().info("Connecting to database....");
     try {
         await db.createPool();
         await db.getPool().getConnection();
@@ -123,8 +123,9 @@ async function checkForUpcomingLessonReminders(){
     }
 }
 
-
-setInterval(async () => {
+// Runs the weekly tasks every monday at 00:00 aka midnight. Note different time to daily tasks to prevent issues
+// with concurrent tasks running.
+exports.scheduledFunction = functions.pubsub.schedule('every monday 00:00').onRun(async context => {
     logger.getLogger().info("#### Beginning weekly tasks ####");
     try {
         await assertDGAAExists();
@@ -136,10 +137,12 @@ setInterval(async () => {
     } catch (err) {
         logger.getLogger().error(`Failed in clearLastYearsAllocations() in server.js ${err}`);
     }
-}, 6.048e8); // One week 6.048e8
+    return null;
+});
 
-
-setInterval(async () => {
+// Daily tasks that run at 1 am every day. NB different time to weekly tasks to prevent issues with concurrent
+// tasks running.
+exports.scheduledFunction = functions.pubsub.schedule('every day 01:00').onRun(async context => {
     logger.getLogger().info("#### Beginning daily tasks ####");
     try{
         await checkForLateReminders();
@@ -148,4 +151,5 @@ setInterval(async () => {
         logger.getLogger().error(`Failure in server daily actions ${err}`);
     }
     logger.getLogger().info("#### Finished daily tasks ####");
-},  8.64e7) // One day 8.64e7
+    return null;
+});
