@@ -124,7 +124,7 @@ async function checkForUpcomingLessonReminders(){
 }
 
 // Runs the monthly tasks every first day of the month at 02:00
-exports.scheduledFunction = functions.pubsub.schedule('1st 02:00').onRun(async context => {
+exports.scheduledFunction = functions.pubsub.schedule('1st 01:00').onRun(async context => {
     logger.getLogger().info("#### Beginning monthly tasks ####");
     try {
         await allocations.clearLastYearsAllocations();
@@ -148,7 +148,7 @@ exports.scheduledFunction = functions.pubsub.schedule('every monday 00:00').onRu
 });
 
 // Daily tasks that run at 1 am every day
-exports.scheduledFunction = functions.pubsub.schedule('every day 01:00').onRun(async context => {
+exports.scheduledFunction = functions.pubsub.schedule('every day 11:00').onRun(async context => {
     logger.getLogger().info("#### Beginning daily tasks ####");
     try{
         await checkForLateReminders();
