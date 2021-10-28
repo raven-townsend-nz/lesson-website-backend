@@ -123,8 +123,19 @@ async function checkForUpcomingLessonReminders(){
     }
 }
 
-// Runs the weekly tasks every monday at 00:00 aka midnight. Note different time to daily tasks to prevent issues
-// with concurrent tasks running.
+// Runs the monthly tasks every first day of the month at 02:00
+exports.scheduledFunction = functions.pubsub.schedule('1st 02:00').onRun(async context => {
+    logger.getLogger().info("#### Beginning monthly tasks ####");
+    try {
+        await allocations.clearLastYearsAllocations();
+    } catch (err) {
+        logger.getLogger().error(`Failed in clearLastYearsAllocations() in server.js ${err}`);
+    }
+    logger.getLogger().info("#### Finished monthly tasks ####");
+    return null;
+});
+
+// Runs the weekly tasks every monday at 00:00 aka midnight
 exports.scheduledFunction = functions.pubsub.schedule('every monday 00:00').onRun(async context => {
     logger.getLogger().info("#### Beginning weekly tasks ####");
     try {
@@ -132,16 +143,11 @@ exports.scheduledFunction = functions.pubsub.schedule('every monday 00:00').onRu
     } catch (err) {
         logger.getLogger().error(`Failure in assertDGAAExists() in server.js ${err}`);
     }
-    try {
-        await allocations.clearLastYearsAllocations();
-    } catch (err) {
-        logger.getLogger().error(`Failed in clearLastYearsAllocations() in server.js ${err}`);
-    }
+    logger.getLogger().info("#### Finished weekly tasks ####");
     return null;
 });
 
-// Daily tasks that run at 1 am every day. NB different time to weekly tasks to prevent issues with concurrent
-// tasks running.
+// Daily tasks that run at 1 am every day
 exports.scheduledFunction = functions.pubsub.schedule('every day 01:00').onRun(async context => {
     logger.getLogger().info("#### Beginning daily tasks ####");
     try{
