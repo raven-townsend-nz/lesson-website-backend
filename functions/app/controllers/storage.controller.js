@@ -15,30 +15,7 @@ const acceptedTypes = [
 
 exports.directArchive = async function (req, res) {
     try {
-        console.log(req.file);
-        if (!req.body) {
-            res.status(400).send('No file uploaded.');
-            return;
-        }
-
-        const storage = new Storage();
-        const bucket = storage.bucket(functions.config().env.gcloud_storage_bucket);
-
-        // Create a new blob in the bucket and upload the file data.
-        const blob = bucket.file(req.file.originalname);
-        const blobStream = blob.createWriteStream({
-            resumable: false,
-        });
-
-        blobStream.on('finish', () => {
-            // The public URL can be used to directly access the file via HTTP.
-            const publicUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
-            console.log(publicUrl)
-            res.status(200).send(publicUrl);
-        });
-
-        blobStream.end(req.file.buffer);
-        res.status(200).send();
+        await storage.uploadFileToGoogleBucket(req.body, req.query.filename);
 
     } catch (err) {
         logger.getLogger().error(`Error in directArchive(), storage.controller, ${err}`);

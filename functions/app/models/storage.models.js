@@ -1,6 +1,27 @@
 const db = require('../../config/db');
 const path = require('path');
 const fs = require('mz/fs');
+const {Storage} = require("@google-cloud/storage");
+const functions = require("firebase-functions");
+
+const storage = new Storage();
+const bucket = storage.bucket(functions.config().env.gcloud_storage_bucket);
+
+
+exports.uploadFileToGoogleBucket = async function (buffer, filename) {
+
+    // Create a new blob in the bucket and upload the file data.
+    const blob = bucket.file(filename);
+    const blobStream = blob.createWriteStream({
+        resumable: false,
+    });
+
+    blobStream.on('finish', () => {
+        // The public URL can be used to directly access the file via HTTP.
+        return `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
+    });
+    blobStream.end(buffer);
+}
 
 
 exports.uploadToArchive = async function (fileContents, contentType, fileName, group, lessonId) {
@@ -13,9 +34,7 @@ exports.uploadToArchive = async function (fileContents, contentType, fileName, g
 
     let storedFileName = `${fileId}-${fileName}`;
 
-    let root = path.dirname(require.main.filename)
-    let filePath = path.join(root +'/storage/', storedFileName);
-    fs.writeFileSync(filePath, fileContents);
+    await this.uploadFileToGoogleBucket(fileContents, storedFileName);
 
     return fileId;
 };
@@ -28,10 +47,10 @@ exports.uploadToAllocation = async function (fileContents, contentType, fileName
     await db.getPool().query(allocationSQL, [allocationId, fileId]);
 
     let storedFileName = `${fileId}-${fileName}`;
+    const url = await this.uploadFileToGoogleBucket(fileContents, storedFileName);
 
-    let root = path.dirname(require.main.filename)
-    let filePath = path.join(root +'/storage/', storedFileName);
-    fs.writeFileSync(filePath, fileContents);
+    const insertUrl = "UPDATE file_submissions SET file_url = ? WHERE id = ?;";
+    await db.getPool().query(insertUrl, [url, fileId]);
 
     return fileId;
 }
@@ -99,11 +118,13 @@ exports.getFileFromTable = async function (table, fileId) {
  * @returns {Promise<void>}
  */
 exports.deleteFile = async function (filename, fileId) {
-    const fileDirectory = './storage/';
-    const filePath = fileDirectory + filename;
-    if (await fs.exists(filePath)) {
-        fs.unlinkSync(filePath);
-    }
+    // const fileDirectory = './storage/';
+    // const filePath = fileDirectory + filename;
+    // if (await fs.exists(filePath)) {
+    //     fs.unlinkSync(filePath);
+    // }
+    await bucket.file(filename).delete();
+
     const deleteSQL = 'DELETE FROM file_submissions where id = ?'; // this will cascade and delete related entries in allocation_files and archived_files
     await db.getPool().query(deleteSQL, [fileId]);
 };
@@ -125,7 +146,6 @@ exports.deleteArchivedFile = async function (filename, fileId) {
     } else {
         await this.deleteFile(filename, fileId);
     }
-
 };
 
 
