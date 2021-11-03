@@ -1,13 +1,5 @@
 const storage = require('../controllers/storage.controller');
 const authenticate = require('../middleware/authenticate');
-const multer  = require('multer');
-
-const upload = multer({
-    storage: multer.memoryStorage(),
-    limits: {
-        fileSize: 5 * 1024 * 1024
-    }});
-// const upload = multer({dest: 'storage/'});
 
 
 module.exports = function (app) {
@@ -21,7 +13,7 @@ module.exports = function (app) {
         .post(authenticate.adminRequired, storage.archive);
 
     app.route('/storage/directArchive')
-        .post(authenticate.adminRequired, upload.single('file'), storage.directArchive);
+        .post(authenticate.adminRequired, storage.directArchive);
 
     app.route('/storage/:id')
         .get(authenticate.loginRequired, storage.getFile) // gets the google storage url for the file

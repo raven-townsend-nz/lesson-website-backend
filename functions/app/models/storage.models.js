@@ -1,6 +1,4 @@
 const db = require('../../config/db');
-const path = require('path');
-const fs = require('mz/fs');
 const {Storage} = require("@google-cloud/storage");
 const functions = require("firebase-functions");
 
@@ -99,13 +97,12 @@ exports.getFileFromTable = async function (table, fileId) {
  * @param fileId the ID of the file to be deleted
  * @returns {Promise<void>}
  */
-exports.deleteFile = async function (filename, fileId) {
-    // const fileDirectory = './storage/';
-    // const filePath = fileDirectory + filename;
-    // if (await fs.exists(filePath)) {
-    //     fs.unlinkSync(filePath);
-    // }
-    await bucket.file(filename).delete();
+exports.deleteFile = async function (fileId) {
+    const getNameSql = "SELECT filename FROM file_submissions WHERE id = ?;";
+    const [results] = await db.getPool().query(getNameSql, [fileId]);
+    const fullFileName = fileId + "-" + results[0].filename;
+
+    await bucket.file(fullFileName).delete();
 
     const deleteSQL = 'DELETE FROM file_submissions where id = ?'; // this will cascade and delete related entries in allocation_files and archived_files
     await db.getPool().query(deleteSQL, [fileId]);
@@ -119,14 +116,14 @@ exports.deleteFile = async function (filename, fileId) {
  * @param fileId
  * @returns {Promise<void>}
  */
-exports.deleteArchivedFile = async function (filename, fileId) {
+exports.deleteArchivedFile = async function (fileId) {
     let checkSql = "SELECT * FROM allocation_files WHERE file_id = ?";
     let [res] = await db.getPool().query(checkSql, [fileId]);
     if (res.length > 0) {
         const deleteSql = "DELETE FROM archived_files WHERE file_id = ?";
         await db.getPool().query(deleteSql, [fileId]);
     } else {
-        await this.deleteFile(filename, fileId);
+        await this.deleteFile(fileId);
     }
 };
 
@@ -138,7 +135,7 @@ exports.deleteArchivedFile = async function (filename, fileId) {
  * @param fileId
  * @returns {Promise<void>}
  */
-exports.deleteAllocationFile = async function (filename, fileId) {
+exports.deleteAllocationFile = async function (fileId) {
     let checkSql = "SELECT * FROM archived_files WHERE file_id = ?";
     let res = (await db.getPool().query(checkSql, [fileId]))[0];
     let deleteSql;
@@ -146,7 +143,7 @@ exports.deleteAllocationFile = async function (filename, fileId) {
         deleteSql = "DELETE FROM allocation_files WHERE file_id = ?";
         await db.getPool().query(deleteSql, [fileId]);
     } else {
-        await this.deleteFile(filename, fileId)
+        await this.deleteFile(fileId)
     }
 }
 

@@ -60,8 +60,7 @@ deleteAllocationFiles = async function (allocationId) {
     const getFilesSql = "SELECT A.file_id, F.filename FROM allocation_files A JOIN file_submissions F ON A.file_id = F.id WHERE A.allocation_id = ?";
     let [res] = await db.getPool().query(getFilesSql, [allocationId]);
     for (let row of res) {
-        const filename = row.file_id + '-' + row.filename;
-        await storage.deleteAllocationFile(filename, row.file_id);
+        await storage.deleteAllocationFile(row.file_id);
     }
     const deleteAllocationFilesSql = "DELETE FROM allocation_files WHERE allocation_id = ?";
     await db.getPool().query(deleteAllocationFilesSql, [allocationId]);

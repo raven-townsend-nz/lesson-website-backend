@@ -77,13 +77,12 @@ exports.getFile = async function (req, res) {
 exports.deleteArchivedFile = async function (req, res) {
     try {
         const fileId = req.params.id;
-        const fileName = await storage.getFileName(fileId);
         const archiveFile = await storage.getFileFromTable('archived_files', fileId);
-        if (fileName === null || archiveFile === null) {
+        if (archiveFile === null) {
             res.status(404).send('File not found');
             return;
         }
-        await storage.deleteArchivedFile(fileName, fileId);
+        await storage.deleteArchivedFile(fileId);
         res.status(200).send();
 
     }  catch (err) {
@@ -96,9 +95,8 @@ exports.deleteAllocationFile = async function (req, res) {
   try {
       const fileId = req.params.fileId;
       const allocationId = req.params.allocationId;
-      const fileName = await storage.getFileName(fileId);
       const allocationFile = await storage.getFileFromTable('allocation_files', fileId);
-      if (fileName === null || allocationFile === null) {
+      if (allocationFile === null) {
           res.status(404).send('File not found');
           return;
       }
@@ -112,7 +110,7 @@ exports.deleteAllocationFile = async function (req, res) {
           res.status(403).send('User must be an allocation instructor or an admin');
           return;
       }
-      await storage.deleteAllocationFile(fileName, fileId);
+      await storage.deleteAllocationFile(fileId);
       const [files] = await allocations.getAllocationFiles(allocationId);
       if (files.children.length === 0) {
           const notSubmittedId = 1;
@@ -129,7 +127,7 @@ exports.deleteAllocationFile = async function (req, res) {
 exports.archive = async function (req, res) {
     try{
         const fileId = req.params.id;
-        const file = await storage.getFileName(fileId);
+        const file = await storage.retrieveFile(fileId);
         if (file === null) {
             res.status(404).send('File not found');
             return;
