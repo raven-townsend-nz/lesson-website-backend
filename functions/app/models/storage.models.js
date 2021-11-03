@@ -6,7 +6,7 @@ const storage = new Storage();
 const bucket = storage.bucket(functions.config().env.gcloud_storage_bucket);
 
 
-exports.uploadFileToGoogleBucket = async function (buffer, filename, fileId) {
+exports.uploadFileToGoogleBucket = async function (res, buffer, filename, fileId) {
 
     // Create a new blob in the bucket and upload the file data.
     const blob = bucket.file(filename);
@@ -16,15 +16,17 @@ exports.uploadFileToGoogleBucket = async function (buffer, filename, fileId) {
 
     blobStream.on('finish', async () => {
         // The public URL can be used to directly access the file via HTTP.
-        const url = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
+        const googleFilename = encodeURIComponent(blob.name);
+        const url = `https://storage.googleapis.com/${bucket.name}/${googleFilename}`;
         const insertUrl = "UPDATE file_submissions SET url = ? WHERE id = ?;";
         await db.getPool().query(insertUrl, [url, fileId]);
+        res.status(200).send({fileId: fileId});
     });
     blobStream.end(buffer);
 }
 
 
-exports.uploadToArchive = async function (fileContents, contentType, fileName, group, lessonId) {
+exports.uploadToArchive = async function (res, fileContents, fileName, group, lessonId) {
 
     const submissionsSQL = "INSERT INTO `file_submissions` (`filename`) VALUES (?);";
     const fileId = (await db.getPool().query(submissionsSQL, [fileName]))[0].insertId;
@@ -33,13 +35,12 @@ exports.uploadToArchive = async function (fileContents, contentType, fileName, g
     await db.getPool().query(archiveSQL, [lessonId, fileId, group])
 
     let storedFileName = `${fileId}-${fileName}`;
-
-    await this.uploadFileToGoogleBucket(fileContents, storedFileName, fileId);
+    await this.uploadFileToGoogleBucket(res, fileContents, storedFileName, fileId);
 
     return fileId;
 };
 
-exports.uploadToAllocation = async function (fileContents, contentType, fileName, allocationId) {
+exports.uploadToAllocation = async function (res, fileContents, fileName, allocationId) {
     const submissionsSQL = "INSERT INTO `file_submissions` (`filename`) VALUES (?);";
     const fileId = (await db.getPool().query(submissionsSQL, [fileName]))[0].insertId;
 
@@ -47,7 +48,7 @@ exports.uploadToAllocation = async function (fileContents, contentType, fileName
     await db.getPool().query(allocationSQL, [allocationId, fileId]);
 
     let storedFileName = `${fileId}-${fileName}`;
-    await this.uploadFileToGoogleBucket(fileContents, storedFileName, fileId);
+    await this.uploadFileToGoogleBucket(res, fileContents, storedFileName, fileId);
 
     return fileId;
 }
@@ -102,7 +103,14 @@ exports.deleteFile = async function (fileId) {
     const [results] = await db.getPool().query(getNameSql, [fileId]);
     const fullFileName = fileId + "-" + results[0].filename;
 
-    await bucket.file(fullFileName).delete();
+    try {
+        await bucket.file(fullFileName).delete();
+    } catch (err) {
+        // If there is no such object, then it must have already been deleted so we can skip this step.
+        if (!err.toString().includes("No such object")) {
+            throw err;
+        }
+    }
 
     const deleteSQL = 'DELETE FROM file_submissions where id = ?'; // this will cascade and delete related entries in allocation_files and archived_files
     await db.getPool().query(deleteSQL, [fileId]);

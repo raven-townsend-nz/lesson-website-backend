@@ -1,8 +1,6 @@
 const storage = require('../models/storage.models');
 const logger = require("../../config/logger");
 const allocations = require('../models/allocations.models');
-const {Storage} = require('@google-cloud/storage');
-const functions = require("firebase-functions");
 
 
 const acceptedTypes = [
@@ -15,7 +13,25 @@ const acceptedTypes = [
 
 exports.directArchive = async function (req, res) {
     try {
-        await storage.uploadFileToGoogleBucket(req.body, req.query.filename);
+        const fileContents = req.body;
+        const fileName = req.query.filename;
+        const group = req.query.group;
+        const lessonId = req.query.lessonId;
+        if (fileName === null || group === null || lessonId === null) {
+            res.status(400).send("One of the required query parameters (fileName, group, lessonId) is missing");
+            return;
+        }
+        const contentType = req.header("Content-Type");
+
+        if (fileContents === undefined){
+            res.status(400).send("File contents are empty");
+            return;
+        } else if (!(acceptedTypes.includes(contentType))) {
+            res.status(400).send("Content type not accepted");
+            return;
+        }
+
+        await storage.uploadToArchive(res, fileContents, fileName, group, lessonId);
 
     } catch (err) {
         logger.getLogger().error(`Error in directArchive(), storage.controller, ${err}`);
@@ -23,6 +39,7 @@ exports.directArchive = async function (req, res) {
     }
 
 };
+
 
 exports.uploadToAllocation = async function (req, res) {
     try {
@@ -45,10 +62,9 @@ exports.uploadToAllocation = async function (req, res) {
         const userId = req.authenticatedUserId;
         let userIsInstructor = await allocations.checkUserIsInstructor(userId, allocationId);
         if (userIsInstructor || req.isAdmin) {
-            const fileId = (await storage.uploadToAllocation(fileContents, contentType, fileName, allocationId));
             const pendingStateID = 2;
             await allocations.updateAllocationState(allocationId, pendingStateID);
-            res.status(200).send({fileId: fileId});
+            await storage.uploadToAllocation(res, fileContents, fileName, allocationId);
         } else {
             res.status(403).send('User must be an allocation instructor or an admin');
         }
