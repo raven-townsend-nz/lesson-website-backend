@@ -148,7 +148,7 @@ exports.scheduledFunction = functions.pubsub.schedule('every monday 00:00').onRu
 });
 
 // Daily tasks that run at 1 am every day
-exports.scheduledFunction = functions.pubsub.schedule('every day 11:00').onRun(async context => {
+exports.scheduledFunction = functions.pubsub.schedule('every day 15:00').onRun(async context => {
     logger.getLogger().info("#### Beginning daily tasks ####");
     try{
         await checkForLateReminders();
