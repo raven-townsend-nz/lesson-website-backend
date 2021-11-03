@@ -8,7 +8,7 @@ const storage = new Storage();
 const bucket = storage.bucket(functions.config().env.gcloud_storage_bucket);
 
 
-exports.uploadFileToGoogleBucket = async function (buffer, filename) {
+exports.uploadFileToGoogleBucket = async function (buffer, filename, fileId) {
 
     // Create a new blob in the bucket and upload the file data.
     const blob = bucket.file(filename);
@@ -16,9 +16,11 @@ exports.uploadFileToGoogleBucket = async function (buffer, filename) {
         resumable: false,
     });
 
-    blobStream.on('finish', () => {
+    blobStream.on('finish', async () => {
         // The public URL can be used to directly access the file via HTTP.
-        return `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
+        const url = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
+        const insertUrl = "UPDATE file_submissions SET url = ? WHERE id = ?;";
+        await db.getPool().query(insertUrl, [url, fileId]);
     });
     blobStream.end(buffer);
 }
@@ -34,7 +36,7 @@ exports.uploadToArchive = async function (fileContents, contentType, fileName, g
 
     let storedFileName = `${fileId}-${fileName}`;
 
-    await this.uploadFileToGoogleBucket(fileContents, storedFileName);
+    await this.uploadFileToGoogleBucket(fileContents, storedFileName, fileId);
 
     return fileId;
 };
@@ -47,10 +49,7 @@ exports.uploadToAllocation = async function (fileContents, contentType, fileName
     await db.getPool().query(allocationSQL, [allocationId, fileId]);
 
     let storedFileName = `${fileId}-${fileName}`;
-    const url = await this.uploadFileToGoogleBucket(fileContents, storedFileName);
-
-    const insertUrl = "UPDATE file_submissions SET file_url = ? WHERE id = ?;";
-    await db.getPool().query(insertUrl, [url, fileId]);
+    await this.uploadFileToGoogleBucket(fileContents, storedFileName, fileId);
 
     return fileId;
 }
