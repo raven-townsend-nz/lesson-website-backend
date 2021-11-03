@@ -70,7 +70,7 @@ exports.uploadToAllocation = async function (req, res) {
         }
 
     } catch (err) {
-        console.error(err);
+        logger.getLogger().error(`Error in uploadToAllocation(), storage.controller, ${err}`);
         res.status(500).send();
     }
 };
