@@ -62,19 +62,12 @@ exports.uploadToAllocation = async function (req, res) {
 exports.getFile = async function (req, res) {
     try {
         const fileId = req.params.id;
-        const storedName = await storage.getFileName(fileId);
-        if (storedName === null) {
-            res.status(404).send("No File with that ID exists");
+        const url = await storage.retrieveFile(fileId);
+        if (url === null) {
+            res.status(404).send('File Not Found');
         } else {
-
-            const fileDetails = await storage.retrieveFile(storedName);
-            if (fileDetails === null) {
-                res.status(404).send('File Not Found');
-            } else {
-                res.status(200).contentType(fileDetails.mimeType).send(fileDetails.file);
-            }
+            res.status(200).send(url);
         }
-
     }  catch (err) {
         logger.getLogger().error(`Error in getFile(), storage.controller, ${err}`);
         res.status(500).send();

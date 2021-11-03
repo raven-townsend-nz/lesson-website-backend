@@ -64,35 +64,18 @@ getMimeType = function (filename) {
 }
 
 /**
- * Retrieve a file
+ * Retrieve a the google storage URL for a file (as saved in the database).
  * @returns {Promise<null|{file: *, mimeType: string}>}
- * @param fileName
+ * @param fileId ID of the file to retrieve
  */
-exports.retrieveFile = async function (fileName) {
-
-    const fileDirectory = './storage/';
-    if (await fs.exists(fileDirectory + fileName)) {
-        const file = await fs.readFile(fileDirectory + fileName);
-        const mimeType = getMimeType(fileName);
-        return {file:file, mimeType:mimeType};
-    } else {
-        return null;
-    }
-};
-
-/**
- * Gets the file name (in the format ID + filename)
- * @param fileId
- * @returns Promise<string|null>
- */
-exports.getFileName = async function (fileId) {
-    const selectSQL = 'SELECT `filename` FROM `file_submissions` WHERE `id` = ?';
-    const result = await db.getPool().query(selectSQL, [fileId]);
-    const fileName = result[0];
-    if (fileName.length > 0) {
-        return fileId + '-' + fileName[0].filename;
+exports.retrieveFile = async function (fileId) {
+    const getFileUrlSql = "SELECT url FROM file_submissions WHERE id = ?;";
+    const [results] = await db.getPool().query(getFileUrlSql, [fileId]);
+    if (results.length > 0) {
+        return results[0];
     }
     return null;
+
 };
 
 

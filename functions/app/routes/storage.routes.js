@@ -24,7 +24,7 @@ module.exports = function (app) {
         .post(authenticate.adminRequired, upload.single('file'), storage.directArchive);
 
     app.route('/storage/:id')
-        .get(authenticate.loginRequired, storage.getFile)
+        .get(authenticate.loginRequired, storage.getFile) // gets the google storage url for the file
         .delete(authenticate.adminRequired, storage.deleteArchivedFile);
 
     app.route('/allocations/:id/files')
