@@ -99,6 +99,7 @@ CREATE TABLE `allocated_instructors` (
 CREATE TABLE `file_submissions` (
     `id`         int(11)         NOT NULL AUTO_INCREMENT,
     `filename`   VARCHAR(255)    NOT NULL,
+    `url`        VARCHAR(1024)   DEFAULT NULL,
 
     PRIMARY KEY (`id`)
 );
