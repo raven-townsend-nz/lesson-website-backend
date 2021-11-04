@@ -264,7 +264,7 @@ exports.getLateAllocations = async function () {
     //Selects id, lesson_id, and date from lesson_allocations where the lesson plan has not yet been submitted and it is is late
     // It is late because the lesson date is 21 days in front of the current day
     // This is then joined to allocated instructors and lessons to get the instructors to notify and the lesson title to include in the notifications.
-    const getAllocationsSql = "SELECT L.code AS code, L.year_level AS yearLevel, L.lesson_number AS lessonNumber, L.title AS title, A.date AS date, U.slack_id AS slackId FROM "+
+    const getAllocationsSql = "SELECT L.code AS code, L.year_level AS yearLevel, L.lesson_number AS lessonNumber, L.title AS title, A.date AS date, U.slack_id AS slackId, U.first_name AS firstName, U.last_name AS lastName FROM "+
     "(SELECT * FROM lesson_allocations WHERE state_id = 1 AND date = ADDDATE(CURDATE(), ?)) A " + //gets late allocations which have not seen a submission
     "LEFT JOIN allocated_instructors I ON A.id = I.allocation_id " + // gets the instructors
     "LEFT JOIN lessons L ON A.lesson_id = L.id " + // gets the lesson titles
@@ -273,7 +273,7 @@ exports.getLateAllocations = async function () {
 };
 
 exports.getUpcomingLessons = async function () {
-    const getUpcomingLessonsSql = "SELECT L.code AS code, L.year_level AS yearLevel, L.lesson_number AS lessonNumber, L.title AS title, A.date AS date, U.slack_id AS slackId FROM "+
+    const getUpcomingLessonsSql = "SELECT L.code AS code, L.year_level AS yearLevel, L.lesson_number AS lessonNumber, L.title AS title, A.date AS date, U.slack_id AS slackId, U.first_name AS firstName, U.last_name AS lastName FROM "+
         "(SELECT * FROM lesson_allocations WHERE date = ADDDATE(CURDATE(), ?)) A " + //gets late allocations which have not seen a submission
         "LEFT JOIN allocated_instructors I ON A.id = I.allocation_id " + // gets the instructors
         "LEFT JOIN lessons L ON A.lesson_id = L.id " + // gets the lesson titles
