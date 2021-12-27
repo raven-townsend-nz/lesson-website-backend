@@ -2,7 +2,8 @@ const admin = require('../models/admin.models');
 const users = require('../models/users.models');
 const {loggedOutRequired} = require("../middleware/authenticate");
 const logger = require("../../config/logger");
-const DGAA_EMAIL = process.env.DGAA_EMAIL;
+const functions = require("firebase-functions");
+const DGAA_EMAIL = functions.config().env.dgaa_email;
 
 exports.addAdmin = async function (req, res) {
     try {

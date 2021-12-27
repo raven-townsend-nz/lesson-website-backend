@@ -57,7 +57,7 @@ exports.isValidRequiredInt = function (num) {
         return false;
     } else if (typeof(num) !== 'number') {
         return false;
-    } else if (num < 1) {
+    } else if (num < 0) {
         return false;
     } else if (!Number.isInteger(num)) {
         return false;

@@ -1,27 +1,27 @@
 -- noinspection SqlNoDataSourceInspectionForFile
 
 # MySQL scripts for dropping existing tables and recreating the database table structure
-INSERT INTO squadro1_lesson_database.users (id, email, first_name, last_name, password, slack_id, auth_token, is_admin) VALUES (1, 'lesson.plans@17squadronatc.com', 'Admin', 'Account', '$2b$10$4rr97kZtpdvsqtjSIQFYkuHbOMe/UoWF.SlQkiMZ0qXE/jvvdoEGa', 'U024M3S4R9S', null, 1);
-INSERT INTO squadro1_lesson_database.users (id, email, first_name, last_name, password, slack_id, auth_token, is_admin) VALUES (2, 'admin@admin.com', 'Admin', 'Admin', '$2b$10$CRLPeoJCQoLC1I8AWW6Lk.zi01qPojRF46LZKVLTS0EA5Qj50pWkO', 'ABC12345', null, 1);
-INSERT INTO squadro1_lesson_database.users (id, email, first_name, last_name, password, slack_id, auth_token, is_admin) VALUES (3, 'normal@user.com', 'Normal', 'User', '$2b$10$vRFr6C9y45f4T5EmROaQOe7E1hJkH/Z4Uo/bKiPnRBuSMagfuX3Su', 'ABC1234539874', null, 0);
-INSERT INTO squadro1_lesson_database.users (id, email, first_name, last_name, password, slack_id, auth_token, is_admin) VALUES (4, 'a@gmail.com', 'Amanda', 'Faria', 'abc234', 'ABC12346', null, 0);
-INSERT INTO squadro1_lesson_database.users (id, email, first_name, last_name, password, slack_id, auth_token, is_admin) VALUES (5, 'B@gmail.com', 'Fernando', 'Brown', 'abc345', 'ABC12347', null, 0);
-INSERT INTO squadro1_lesson_database.users (id, email, first_name, last_name, password, slack_id, auth_token, is_admin) VALUES (6, 'jeh128@mail.nz', 'Jack', 'Chen', 'abc456', 'ABC12348', null, 0);
-INSERT INTO squadro1_lesson_database.users (id, email, first_name, last_name, password, slack_id, auth_token, is_admin) VALUES (7, 'lfg23@mail.nz', 'Ella', 'Yellow', 'abc567', 'ABC12349', null, 0);
-INSERT INTO squadro1_lesson_database.users (id, email, first_name, last_name, password, slack_id, auth_token, is_admin) VALUES (8, 'zhe25@mail.nz', 'Henry', 'Krippner', 'abc678', 'DBC12345', null, 0);
-INSERT INTO squadro1_lesson_database.users (id, email, first_name, last_name, password, slack_id, auth_token, is_admin) VALUES (9, 'ama541@mail.nz', 'Finn', 'Veale', 'abc789', 'ADC12345', null, 0);
-INSERT INTO squadro1_lesson_database.users (id, email, first_name, last_name, password, slack_id, auth_token, is_admin) VALUES (10, '.shellstrop@hotmail.com', 'Eleanor', 'Shellstrop', 'legitsnack', 'ABD12345', null, 0);
-INSERT INTO squadro1_lesson_database.users (id, email, first_name, last_name, password, slack_id, auth_token, is_admin) VALUES (11, 'c.anagonye@stjohns.edu.au', 'Chidi', 'Anagonye', 'peepschili', 'ABC22345', null, 0);
-INSERT INTO squadro1_lesson_database.users (id, email, first_name, last_name, password, slack_id, auth_token, is_admin) VALUES (12, 'tahani.aljamil@ox.ac.uk', 'Tahani', 'Al-Jamil', 'outofthespotlight', 'ABC32345', null, 0);
-INSERT INTO squadro1_lesson_database.users (id, email, first_name, last_name, password, slack_id, auth_token, is_admin) VALUES (13, 'boooooortles@hotmail.com', 'Jason', 'Mendoza', 'boooortles', 'ABC42345', null, 0);
-INSERT INTO squadro1_lesson_database.users (id, email, first_name, last_name, password, slack_id, auth_token, is_admin) VALUES (14, 'mindystclaire@gmail.com', 'Mindy', 'St. Claire', 'password', 'ABC52345', null, 0);
-INSERT INTO squadro1_lesson_database.users (id, email, first_name, last_name, password, slack_id, auth_token, is_admin) VALUES (15, 's.garnett@stjohns.edu.au', 'Simone', 'Garnett', 'nwkvcu33krjf', 'ABC62345', null, 0);
-INSERT INTO squadro1_lesson_database.users (id, email, first_name, last_name, password, slack_id, auth_token, is_admin) VALUES (16, 'pillboi@ymail.com', 'Steven', 'Peleaz', 'jacksonville', 'ABC72345', null, 0);
-INSERT INTO squadro1_lesson_database.users (id, email, first_name, last_name, password, slack_id, auth_token, is_admin) VALUES (17, 'larryhemsworth@gmail.com', 'Larry', 'Hemsworth', 'not_thor', 'ABC82345', null, 0);
-INSERT INTO squadro1_lesson_database.users (id, email, first_name, last_name, password, slack_id, auth_token, is_admin) VALUES (18, 'johnwheaton@gmail.com', 'John', 'Wheaton', 'gossip', 'ABC92345', null, 0);
-INSERT INTO squadro1_lesson_database.users (id, email, first_name, last_name, password, slack_id, auth_token, is_admin) VALUES (19, 'raven@gmail.com', 'Raven', 'Townsend', '$2b$10$HEwgBnZkW.8i8n5PBPhqXOquiBDYtddFKK2bgDZ6HidFnlzHsqYZm', 'U027ZGU52BH', null, 0); # password is password
-INSERT INTO squadro1_lesson_database.users (id, email, first_name, last_name, password, slack_id, auth_token, is_admin) VALUES (20, 'swapnil@gmail.com', 'Swapnil', 'Bhagat', '$2b$10$HEwgBnZkW.8i8n5PBPhqXOquiBDYtddFKK2bgDZ6HidFnlzHsqYZm', 'U029HRS1T3J', null, 0); # ^
-INSERT INTO squadro1_lesson_database.users (id, email, first_name, last_name, password, slack_id, auth_token, is_admin) VALUES (21, 'william@gmail.com', 'William', 'Chen', '$2b$10$HEwgBnZkW.8i8n5PBPhqXOquiBDYtddFKK2bgDZ6HidFnlzHsqYZm', 'U02E1604Q8G', null, 0); # ^
+INSERT INTO users (id, email, first_name, last_name, password, slack_id, auth_token, is_admin) VALUES (1, 'lesson.plans@17squadronatc.com', 'Admin', 'Account', '$2b$10$4rr97kZtpdvsqtjSIQFYkuHbOMe/UoWF.SlQkiMZ0qXE/jvvdoEGa', 'U024M3S4R9S', null, 1);
+INSERT INTO users (id, email, first_name, last_name, password, slack_id, auth_token, is_admin) VALUES (2, 'admin@admin.com', 'Admin', 'Admin', '$2b$10$CRLPeoJCQoLC1I8AWW6Lk.zi01qPojRF46LZKVLTS0EA5Qj50pWkO', 'ABC12345', null, 1);
+INSERT INTO users (id, email, first_name, last_name, password, slack_id, auth_token, is_admin) VALUES (3, 'normal@user.com', 'Normal', 'User', '$2b$10$vRFr6C9y45f4T5EmROaQOe7E1hJkH/Z4Uo/bKiPnRBuSMagfuX3Su', 'ABC1234539874', null, 0);
+INSERT INTO users (id, email, first_name, last_name, password, slack_id, auth_token, is_admin) VALUES (4, 'a@gmail.com', 'Amanda', 'Faria', 'abc234', 'ABC12346', null, 0);
+INSERT INTO users (id, email, first_name, last_name, password, slack_id, auth_token, is_admin) VALUES (5, 'B@gmail.com', 'Fernando', 'Brown', 'abc345', 'ABC12347', null, 0);
+INSERT INTO users (id, email, first_name, last_name, password, slack_id, auth_token, is_admin) VALUES (6, 'jeh128@mail.nz', 'Jack', 'Chen', 'abc456', 'ABC12348', null, 0);
+INSERT INTO users (id, email, first_name, last_name, password, slack_id, auth_token, is_admin) VALUES (7, 'lfg23@mail.nz', 'Ella', 'Yellow', 'abc567', 'ABC12349', null, 0);
+INSERT INTO users (id, email, first_name, last_name, password, slack_id, auth_token, is_admin) VALUES (8, 'zhe25@mail.nz', 'Henry', 'Krippner', 'abc678', 'DBC12345', null, 0);
+INSERT INTO users (id, email, first_name, last_name, password, slack_id, auth_token, is_admin) VALUES (9, 'ama541@mail.nz', 'Finn', 'Veale', 'abc789', 'ADC12345', null, 0);
+INSERT INTO users (id, email, first_name, last_name, password, slack_id, auth_token, is_admin) VALUES (10, '.shellstrop@hotmail.com', 'Eleanor', 'Shellstrop', 'legitsnack', 'ABD12345', null, 0);
+INSERT INTO users (id, email, first_name, last_name, password, slack_id, auth_token, is_admin) VALUES (11, 'c.anagonye@stjohns.edu.au', 'Chidi', 'Anagonye', 'peepschili', 'ABC22345', null, 0);
+INSERT INTO users (id, email, first_name, last_name, password, slack_id, auth_token, is_admin) VALUES (12, 'tahani.aljamil@ox.ac.uk', 'Tahani', 'Al-Jamil', 'outofthespotlight', 'ABC32345', null, 0);
+INSERT INTO users (id, email, first_name, last_name, password, slack_id, auth_token, is_admin) VALUES (13, 'boooooortles@hotmail.com', 'Jason', 'Mendoza', 'boooortles', 'ABC42345', null, 0);
+INSERT INTO users (id, email, first_name, last_name, password, slack_id, auth_token, is_admin) VALUES (14, 'mindystclaire@gmail.com', 'Mindy', 'St. Claire', 'password', 'ABC52345', null, 0);
+INSERT INTO users (id, email, first_name, last_name, password, slack_id, auth_token, is_admin) VALUES (15, 's.garnett@stjohns.edu.au', 'Simone', 'Garnett', 'nwkvcu33krjf', 'ABC62345', null, 0);
+INSERT INTO users (id, email, first_name, last_name, password, slack_id, auth_token, is_admin) VALUES (16, 'pillboi@ymail.com', 'Steven', 'Peleaz', 'jacksonville', 'ABC72345', null, 0);
+INSERT INTO users (id, email, first_name, last_name, password, slack_id, auth_token, is_admin) VALUES (17, 'larryhemsworth@gmail.com', 'Larry', 'Hemsworth', 'not_thor', 'ABC82345', null, 0);
+INSERT INTO users (id, email, first_name, last_name, password, slack_id, auth_token, is_admin) VALUES (18, 'johnwheaton@gmail.com', 'John', 'Wheaton', 'gossip', 'ABC92345', null, 0);
+INSERT INTO users (id, email, first_name, last_name, password, slack_id, auth_token, is_admin) VALUES (19, 'raven@gmail.com', 'Raven', 'Townsend', '$2b$10$HEwgBnZkW.8i8n5PBPhqXOquiBDYtddFKK2bgDZ6HidFnlzHsqYZm', 'U027ZGU52BH', null, 0); # password is password
+INSERT INTO users (id, email, first_name, last_name, password, slack_id, auth_token, is_admin) VALUES (20, 'swapnil@gmail.com', 'Swapnil', 'Bhagat', '$2b$10$HEwgBnZkW.8i8n5PBPhqXOquiBDYtddFKK2bgDZ6HidFnlzHsqYZm', 'U029HRS1T3J', null, 0); # ^
+INSERT INTO users (id, email, first_name, last_name, password, slack_id, auth_token, is_admin) VALUES (21, 'william@gmail.com', 'William', 'Chen', '$2b$10$HEwgBnZkW.8i8n5PBPhqXOquiBDYtddFKK2bgDZ6HidFnlzHsqYZm', 'U02E1604Q8G', null, 0); # ^
 
 INSERT INTO `lessons` (`code`, `year_level`, `lesson_number`, `title`, `time`, `scope`, `references`, `training_notes`, `when_to_teach`) VALUES
                                                                                                                                              ('AVS', 1, 1, 'Aviation History', '1 x 40min Period', 'Enabling objectives:\n Identify key moments in aviation history\n Instructional objectives:\nHot air ballooning  (Montgolfier Brothers)

@@ -1,5 +1,6 @@
 const log4js = require("log4js");
 const path = require("path");
+const functions = require("firebase-functions");
 
 /*
 Logger singleton so that only one logger is active at once.
@@ -26,8 +27,8 @@ exports.getLogger = function() {
 
         log4js.configure({
             appenders: {
-                fileAppender: { type: 'dateFile', filename: path.join(__dirname, 'logs/serverLog.log'),
-                    flags: 'a', pattern: process.env.LOGGER_INTERVAL_PATTERN, daysToKeep: process.env.MAX_LOG_COUNT },
+                fileAppender: { type: 'dateFile', filename: '/tmp/serverLog.log',
+                    flags: 'a', pattern: functions.config().env.logger_interval_pattern, daysToKeep: functions.config().env.max_log_count },
                 console: { type: 'console' }
             },
             categories: {

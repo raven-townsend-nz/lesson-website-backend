@@ -2,6 +2,7 @@ const db = require('../../config/db');
 const userModel = require('./users.models');
 const storage = require('./storage.models');
 const logger = require("../../config/logger");
+const functions = require("firebase-functions");
 
 /**
  * Checks if the input combination exists in a row in lesson-allocations.
@@ -59,8 +60,7 @@ deleteAllocationFiles = async function (allocationId) {
     const getFilesSql = "SELECT A.file_id, F.filename FROM allocation_files A JOIN file_submissions F ON A.file_id = F.id WHERE A.allocation_id = ?";
     let [res] = await db.getPool().query(getFilesSql, [allocationId]);
     for (let row of res) {
-        const filename = row.file_id + '-' + row.filename;
-        await storage.deleteAllocationFile(filename, row.file_id);
+        await storage.deleteAllocationFile(row.file_id);
     }
     const deleteAllocationFilesSql = "DELETE FROM allocation_files WHERE allocation_id = ?";
     await db.getPool().query(deleteAllocationFilesSql, [allocationId]);
@@ -264,21 +264,21 @@ exports.getLateAllocations = async function () {
     //Selects id, lesson_id, and date from lesson_allocations where the lesson plan has not yet been submitted and it is is late
     // It is late because the lesson date is 21 days in front of the current day
     // This is then joined to allocated instructors and lessons to get the instructors to notify and the lesson title to include in the notifications.
-    const getAllocationsSql = "SELECT L.code AS code, L.year_level AS yearLevel, L.lesson_number AS lessonNumber, L.title AS title, A.date AS date, U.slack_id AS slackId FROM "+
+    const getAllocationsSql = "SELECT L.code AS code, L.year_level AS yearLevel, L.lesson_number AS lessonNumber, L.title AS title, A.date AS date, U.slack_id AS slackId, U.first_name AS firstName, U.last_name AS lastName FROM "+
     "(SELECT * FROM lesson_allocations WHERE state_id = 1 AND date = ADDDATE(CURDATE(), ?)) A " + //gets late allocations which have not seen a submission
     "LEFT JOIN allocated_instructors I ON A.id = I.allocation_id " + // gets the instructors
     "LEFT JOIN lessons L ON A.lesson_id = L.id " + // gets the lesson titles
     "LEFT JOIN users U on I.instructor_id = U.id"; // gets the slack id from users table
-    return (await db.getPool().query(getAllocationsSql, [process.env.LESSON_PLAN_DUE]))[0];
+    return (await db.getPool().query(getAllocationsSql, [functions.config().env.lesson_plan_due]))[0];
 };
 
 exports.getUpcomingLessons = async function () {
-    const getUpcomingLessonsSql = "SELECT L.code AS code, L.year_level AS yearLevel, L.lesson_number AS lessonNumber, L.title AS title, A.date AS date, U.slack_id AS slackId FROM "+
+    const getUpcomingLessonsSql = "SELECT L.code AS code, L.year_level AS yearLevel, L.lesson_number AS lessonNumber, L.title AS title, A.date AS date, U.slack_id AS slackId, U.first_name AS firstName, U.last_name AS lastName FROM "+
         "(SELECT * FROM lesson_allocations WHERE date = ADDDATE(CURDATE(), ?)) A " + //gets late allocations which have not seen a submission
         "LEFT JOIN allocated_instructors I ON A.id = I.allocation_id " + // gets the instructors
         "LEFT JOIN lessons L ON A.lesson_id = L.id " + // gets the lesson titles
         "LEFT JOIN users U on I.instructor_id = U.id"; // gets the slack id from users table
-    return (await db.getPool().query(getUpcomingLessonsSql, [process.env.UPCOMING_LESSON_DAYS]))[0];
+    return (await db.getPool().query(getUpcomingLessonsSql, [functions.config().env.upcoming_lesson_days]))[0];
 };
 
 exports.getAllocationFiles = async function (allocationId) {

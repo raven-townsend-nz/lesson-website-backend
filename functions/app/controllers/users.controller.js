@@ -1,6 +1,7 @@
 const users = require('../models/users.models');
 const validation = require('../validation/users.validation');
 const logger = require("../../config/logger");
+const functions = require("firebase-functions");
 
 exports.logout = async function (req, res) {
     try {
@@ -194,7 +195,7 @@ exports.edit = async function (req, res) {
             res.status(404).send("No user with that ID exists");
             return;
         }
-        if (user.email === process.env.DGAA_EMAIL) {
+        if (user.email === functions.config().env.dgaa_email) {
             res.status(403).send("Cannot update DGAA details");
             return;
         }

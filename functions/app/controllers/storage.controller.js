@@ -2,6 +2,7 @@ const storage = require('../models/storage.models');
 const logger = require("../../config/logger");
 const allocations = require('../models/allocations.models');
 
+
 const acceptedTypes = [
     'application/msword', //.doc
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document', //.docx
@@ -30,8 +31,7 @@ exports.directArchive = async function (req, res) {
             return;
         }
 
-        const fileId = (await storage.uploadToArchive(fileContents, contentType, fileName, group, lessonId));
-        res.status(200).send({fileId: fileId});
+        await storage.uploadToArchive(res, fileContents, fileName, group, lessonId);
 
     } catch (err) {
         logger.getLogger().error(`Error in directArchive(), storage.controller, ${err}`);
@@ -39,6 +39,7 @@ exports.directArchive = async function (req, res) {
     }
 
 };
+
 
 exports.uploadToAllocation = async function (req, res) {
     try {
@@ -61,16 +62,15 @@ exports.uploadToAllocation = async function (req, res) {
         const userId = req.authenticatedUserId;
         let userIsInstructor = await allocations.checkUserIsInstructor(userId, allocationId);
         if (userIsInstructor || req.isAdmin) {
-            const fileId = (await storage.uploadToAllocation(fileContents, contentType, fileName, allocationId));
             const pendingStateID = 2;
             await allocations.updateAllocationState(allocationId, pendingStateID);
-            res.status(200).send({fileId: fileId});
+            await storage.uploadToAllocation(res, fileContents, fileName, allocationId);
         } else {
             res.status(403).send('User must be an allocation instructor or an admin');
         }
 
     } catch (err) {
-        console.error(err);
+        logger.getLogger().error(`Error in uploadToAllocation(), storage.controller, ${err}`);
         res.status(500).send();
     }
 };
@@ -78,19 +78,12 @@ exports.uploadToAllocation = async function (req, res) {
 exports.getFile = async function (req, res) {
     try {
         const fileId = req.params.id;
-        const storedName = await storage.getFileName(fileId);
-        if (storedName === null) {
-            res.status(404).send("No File with that ID exists");
+        const url = await storage.retrieveFile(fileId);
+        if (url === null) {
+            res.status(404).send('File Not Found');
         } else {
-
-            const fileDetails = await storage.retrieveFile(storedName);
-            if (fileDetails === null) {
-                res.status(404).send('File Not Found');
-            } else {
-                res.status(200).contentType(fileDetails.mimeType).send(fileDetails.file);
-            }
+            res.status(200).send(url);
         }
-
     }  catch (err) {
         logger.getLogger().error(`Error in getFile(), storage.controller, ${err}`);
         res.status(500).send();
@@ -100,13 +93,12 @@ exports.getFile = async function (req, res) {
 exports.deleteArchivedFile = async function (req, res) {
     try {
         const fileId = req.params.id;
-        const fileName = await storage.getFileName(fileId);
         const archiveFile = await storage.getFileFromTable('archived_files', fileId);
-        if (fileName === null || archiveFile === null) {
+        if (archiveFile === null) {
             res.status(404).send('File not found');
             return;
         }
-        await storage.deleteArchivedFile(fileName, fileId);
+        await storage.deleteArchivedFile(fileId);
         res.status(200).send();
 
     }  catch (err) {
@@ -119,9 +111,8 @@ exports.deleteAllocationFile = async function (req, res) {
   try {
       const fileId = req.params.fileId;
       const allocationId = req.params.allocationId;
-      const fileName = await storage.getFileName(fileId);
       const allocationFile = await storage.getFileFromTable('allocation_files', fileId);
-      if (fileName === null || allocationFile === null) {
+      if (allocationFile === null) {
           res.status(404).send('File not found');
           return;
       }
@@ -135,7 +126,7 @@ exports.deleteAllocationFile = async function (req, res) {
           res.status(403).send('User must be an allocation instructor or an admin');
           return;
       }
-      await storage.deleteAllocationFile(fileName, fileId);
+      await storage.deleteAllocationFile(fileId);
       const [files] = await allocations.getAllocationFiles(allocationId);
       if (files.children.length === 0) {
           const notSubmittedId = 1;
@@ -152,7 +143,7 @@ exports.deleteAllocationFile = async function (req, res) {
 exports.archive = async function (req, res) {
     try{
         const fileId = req.params.id;
-        const file = await storage.getFileName(fileId);
+        const file = await storage.retrieveFile(fileId);
         if (file === null) {
             res.status(404).send('File not found');
             return;

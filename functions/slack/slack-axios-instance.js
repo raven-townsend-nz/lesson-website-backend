@@ -1,4 +1,5 @@
 const axios = require("axios");
+const functions = require("firebase-functions");
 
 // Axios instance for slack
 const slackAxiosInstance = axios.create({
@@ -6,7 +7,7 @@ const slackAxiosInstance = axios.create({
     timeout: 5000
 });
 
-const token = process.env.SLACK_TOKEN;
+const token = functions.config().env.slack_token;
 
 slackAxiosInstance.interceptors.request.use(
     config => {

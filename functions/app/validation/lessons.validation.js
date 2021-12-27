@@ -36,7 +36,7 @@ exports.validateLesson = function (lesson) {
         return false
     } if (lesson.yearLevel < 1 || lesson.yearLevel > 5) {
         return false
-    } if (lesson.lessonNumber < 1) {
+    } if (lesson.lessonNumber < 0) {
         return false
     }
     return true;

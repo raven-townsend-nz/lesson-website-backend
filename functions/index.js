@@ -5,15 +5,21 @@ const admin = require('./app/models/admin.models');
 const slackApi = require("./slack/slackApi");
 const logger = require("./config/logger");
 const allocations = require('./app/models/allocations.models');
+const exp = require('express');
+const functions = require('firebase-functions');
+const functionsWithRegion = require('firebase-functions').region('australia-southeast1');
 
 
-const app = express();
-const port = process.env.PORT || 4941;
+const app = exp();
+const port = functions.config().env.port || 4941;
 
+const main = express();
+main.use('/', app);
+exports.app = functionsWithRegion.https.onRequest(main);
 
 // Test connection to MySQL on start-up
 async function testDbConnection() {
-    logger.getLogger().info("Connecting to database...");
+    logger.getLogger().info("Connecting to database....");
     try {
         await db.createPool();
         await db.getPool().getConnection();
@@ -25,12 +31,7 @@ async function testDbConnection() {
 }
 
 
-testDbConnection()
-    .then(function () {
-        app.listen(port, function () {
-            logger.getLogger().info(`Listening on port: ${port}`);
-        });
-    });
+testDbConnection().then(r => r);
 
 
 /**
@@ -122,23 +123,32 @@ async function checkForUpcomingLessonReminders(){
     }
 }
 
+// Runs the monthly tasks every first day of the month at 02:00
+exports.scheduledFunction = functions.pubsub.schedule('1st 01:00').onRun(async context => {
+    logger.getLogger().info("#### Beginning monthly tasks ####");
+    try {
+        await allocations.clearLastYearsAllocations();
+    } catch (err) {
+        logger.getLogger().error(`Failed in clearLastYearsAllocations() in server.js ${err}`);
+    }
+    logger.getLogger().info("#### Finished monthly tasks ####");
+    return null;
+});
 
-setInterval(async () => {
+// Runs the weekly tasks every monday at 00:00 aka midnight
+exports.scheduledFunction = functions.pubsub.schedule('every monday 00:00').onRun(async context => {
     logger.getLogger().info("#### Beginning weekly tasks ####");
     try {
         await assertDGAAExists();
     } catch (err) {
         logger.getLogger().error(`Failure in assertDGAAExists() in server.js ${err}`);
     }
-    try {
-        await allocations.clearLastYearsAllocations();
-    } catch (err) {
-        logger.getLogger().error(`Failed in clearLastYearsAllocations() in server.js ${err}`);
-    }
-}, 6.048e8); // One week 6.048e8
+    logger.getLogger().info("#### Finished weekly tasks ####");
+    return null;
+});
 
-
-setInterval(async () => {
+// Daily tasks that run at 1 am every day
+exports.scheduledFunction = functions.pubsub.schedule('every day 15:00').onRun(async context => {
     logger.getLogger().info("#### Beginning daily tasks ####");
     try{
         await checkForLateReminders();
@@ -147,4 +157,5 @@ setInterval(async () => {
         logger.getLogger().error(`Failure in server daily actions ${err}`);
     }
     logger.getLogger().info("#### Finished daily tasks ####");
-},  8.64e7) // One day 8.64e7
+    return null;
+});

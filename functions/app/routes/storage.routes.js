@@ -1,6 +1,7 @@
 const storage = require('../controllers/storage.controller');
 const authenticate = require('../middleware/authenticate');
 
+
 module.exports = function (app) {
 
     /**
@@ -15,7 +16,7 @@ module.exports = function (app) {
         .post(authenticate.adminRequired, storage.directArchive);
 
     app.route('/storage/:id')
-        .get(authenticate.loginRequired, storage.getFile)
+        .get(authenticate.loginRequired, storage.getFile) // gets the google storage url for the file
         .delete(authenticate.adminRequired, storage.deleteArchivedFile);
 
     app.route('/allocations/:id/files')

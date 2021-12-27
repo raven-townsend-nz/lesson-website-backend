@@ -1,9 +1,32 @@
 const db = require('../../config/db');
-const path = require('path');
-const fs = require('mz/fs');
+const {Storage} = require("@google-cloud/storage");
+const functions = require("firebase-functions");
+
+const storage = new Storage();
+const bucket = storage.bucket(functions.config().env.gcloud_storage_bucket);
 
 
-exports.uploadToArchive = async function (fileContents, contentType, fileName, group, lessonId) {
+exports.uploadFileToGoogleBucket = async function (res, buffer, filename, fileId) {
+
+    // Create a new blob in the bucket and upload the file data.
+    const blob = bucket.file(filename);
+    const blobStream = blob.createWriteStream({
+        resumable: false,
+    });
+
+    blobStream.on('finish', async () => {
+        // The public URL can be used to directly access the file via HTTP.
+        const googleFilename = encodeURIComponent(blob.name);
+        const url = `https://storage.googleapis.com/${bucket.name}/${googleFilename}`;
+        const insertUrl = "UPDATE file_submissions SET url = ? WHERE id = ?;";
+        await db.getPool().query(insertUrl, [url, fileId]);
+        res.status(200).send({fileId: fileId});
+    });
+    blobStream.end(buffer);
+}
+
+
+exports.uploadToArchive = async function (res, fileContents, fileName, group, lessonId) {
 
     const submissionsSQL = "INSERT INTO `file_submissions` (`filename`) VALUES (?);";
     const fileId = (await db.getPool().query(submissionsSQL, [fileName]))[0].insertId;
@@ -12,15 +35,12 @@ exports.uploadToArchive = async function (fileContents, contentType, fileName, g
     await db.getPool().query(archiveSQL, [lessonId, fileId, group])
 
     let storedFileName = `${fileId}-${fileName}`;
-
-    let root = path.dirname(require.main.filename)
-    let filePath = path.join(root +'/storage/', storedFileName);
-    fs.writeFileSync(filePath, fileContents);
+    await this.uploadFileToGoogleBucket(res, fileContents, storedFileName, fileId);
 
     return fileId;
 };
 
-exports.uploadToAllocation = async function (fileContents, contentType, fileName, allocationId) {
+exports.uploadToAllocation = async function (res, fileContents, fileName, allocationId) {
     const submissionsSQL = "INSERT INTO `file_submissions` (`filename`) VALUES (?);";
     const fileId = (await db.getPool().query(submissionsSQL, [fileName]))[0].insertId;
 
@@ -28,10 +48,7 @@ exports.uploadToAllocation = async function (fileContents, contentType, fileName
     await db.getPool().query(allocationSQL, [allocationId, fileId]);
 
     let storedFileName = `${fileId}-${fileName}`;
-
-    let root = path.dirname(require.main.filename)
-    let filePath = path.join(root +'/storage/', storedFileName);
-    fs.writeFileSync(filePath, fileContents);
+    await this.uploadFileToGoogleBucket(res, fileContents, storedFileName, fileId);
 
     return fileId;
 }
@@ -46,35 +63,18 @@ getMimeType = function (filename) {
 }
 
 /**
- * Retrieve a file
+ * Retrieve a the google storage URL for a file (as saved in the database).
  * @returns {Promise<null|{file: *, mimeType: string}>}
- * @param fileName
+ * @param fileId ID of the file to retrieve
  */
-exports.retrieveFile = async function (fileName) {
-
-    const fileDirectory = './storage/';
-    if (await fs.exists(fileDirectory + fileName)) {
-        const file = await fs.readFile(fileDirectory + fileName);
-        const mimeType = getMimeType(fileName);
-        return {file:file, mimeType:mimeType};
-    } else {
-        return null;
-    }
-};
-
-/**
- * Gets the file name (in the format ID + filename)
- * @param fileId
- * @returns Promise<string|null>
- */
-exports.getFileName = async function (fileId) {
-    const selectSQL = 'SELECT `filename` FROM `file_submissions` WHERE `id` = ?';
-    const result = await db.getPool().query(selectSQL, [fileId]);
-    const fileName = result[0];
-    if (fileName.length > 0) {
-        return fileId + '-' + fileName[0].filename;
+exports.retrieveFile = async function (fileId) {
+    const getFileUrlSql = "SELECT url FROM file_submissions WHERE id = ?;";
+    const [results] = await db.getPool().query(getFileUrlSql, [fileId]);
+    if (results.length > 0) {
+        return results[0];
     }
     return null;
+
 };
 
 
@@ -98,12 +98,20 @@ exports.getFileFromTable = async function (table, fileId) {
  * @param fileId the ID of the file to be deleted
  * @returns {Promise<void>}
  */
-exports.deleteFile = async function (filename, fileId) {
-    const fileDirectory = './storage/';
-    const filePath = fileDirectory + filename;
-    if (await fs.exists(filePath)) {
-        fs.unlinkSync(filePath);
+exports.deleteFile = async function (fileId) {
+    const getNameSql = "SELECT filename FROM file_submissions WHERE id = ?;";
+    const [results] = await db.getPool().query(getNameSql, [fileId]);
+    const fullFileName = fileId + "-" + results[0].filename;
+
+    try {
+        await bucket.file(fullFileName).delete();
+    } catch (err) {
+        // If there is no such object, then it must have already been deleted so we can skip this step.
+        if (!err.toString().includes("No such object")) {
+            throw err;
+        }
     }
+
     const deleteSQL = 'DELETE FROM file_submissions where id = ?'; // this will cascade and delete related entries in allocation_files and archived_files
     await db.getPool().query(deleteSQL, [fileId]);
 };
@@ -116,16 +124,15 @@ exports.deleteFile = async function (filename, fileId) {
  * @param fileId
  * @returns {Promise<void>}
  */
-exports.deleteArchivedFile = async function (filename, fileId) {
+exports.deleteArchivedFile = async function (fileId) {
     let checkSql = "SELECT * FROM allocation_files WHERE file_id = ?";
     let [res] = await db.getPool().query(checkSql, [fileId]);
     if (res.length > 0) {
         const deleteSql = "DELETE FROM archived_files WHERE file_id = ?";
         await db.getPool().query(deleteSql, [fileId]);
     } else {
-        await this.deleteFile(filename, fileId);
+        await this.deleteFile(fileId);
     }
-
 };
 
 
@@ -136,7 +143,7 @@ exports.deleteArchivedFile = async function (filename, fileId) {
  * @param fileId
  * @returns {Promise<void>}
  */
-exports.deleteAllocationFile = async function (filename, fileId) {
+exports.deleteAllocationFile = async function (fileId) {
     let checkSql = "SELECT * FROM archived_files WHERE file_id = ?";
     let res = (await db.getPool().query(checkSql, [fileId]))[0];
     let deleteSql;
@@ -144,7 +151,7 @@ exports.deleteAllocationFile = async function (filename, fileId) {
         deleteSql = "DELETE FROM allocation_files WHERE file_id = ?";
         await db.getPool().query(deleteSql, [fileId]);
     } else {
-        await this.deleteFile(filename, fileId)
+        await this.deleteFile(fileId)
     }
 }
 

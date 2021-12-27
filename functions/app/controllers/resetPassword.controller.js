@@ -2,11 +2,12 @@ const resetPasswordModel = require('../models/resetPassword.models');
 const users = require('../models/users.models');
 const axios = require('axios');
 const logger = require("../../config/logger");
+const functions = require("firebase-functions");
 const emailJsUrl = "https://api.emailjs.com/api/v1.0/email/send";
 
 
 const generateLink = function (email, token) {
-    let link = process.env.FRONTEND_URL;
+    let link = functions.config().env.frontend_url;
     link += '/reset-password';
     link += '?email=' + email;
     link += '&token=' + token;
@@ -23,10 +24,10 @@ const sendReset = async function (req, res) {
             return;
         }
         const payload = {
-            service_id: process.env.EMAILJS_SERVICE_ID,
-            template_id: process.env.EMAILJS_RESET_TEMPLATE,
-            user_id: process.env.EMAILJS_USER_ID,
-            accessToken: process.env.EMAILJS_TOKEN,
+            service_id: functions.config().env.emailjs_service_id,
+            template_id: functions.config().env.emailjs_reset_template,
+            user_id: functions.config().env.emailjs_user_id,
+            accessToken: functions.config().env.emailjs_token,
             template_params: {
                 toName: resetInfo.first_name,
                 toEmail: req.body.email,

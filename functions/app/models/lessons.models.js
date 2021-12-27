@@ -129,7 +129,7 @@ deleteLessonFiles = async function (lessonId) {
 
   for (let row of res) {
       const filename = row.file_id + '-' + row.filename;
-      await storage.deleteFile(filename, row.file_id);
+      await storage.deleteFile(row.file_id);
   }
 };
 
