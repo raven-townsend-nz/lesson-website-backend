@@ -112,8 +112,14 @@ exports.deleteFile = async function (fileId) {
         }
     }
 
-    const deleteSQL = 'DELETE FROM file_submissions where id = ?'; // this will cascade and delete related entries in allocation_files and archived_files
-    await db.getPool().query(deleteSQL, [fileId]);
+    const deleteFileSQL = 'DELETE FROM file_submissions where id = ?';
+    await db.getPool().query(deleteFileSQL, [fileId]);
+
+    const deleteAllocationRowSQL = 'DELETE FROM allocation_files where file_id = ?';
+    await db.getPool().query(deleteAllocationRowSQL, [fileId]);
+
+    const deleteArchiveRowSQL = 'DELETE FROM archived_files where file_id = ?';
+    await db.getPool().query(deleteArchiveRowSQL, [fileId]);
 };
 
 
